@@ -1,3 +1,4 @@
+from app.routes.task import task_bp
 from app.models.task import Task
 import pytest
 
