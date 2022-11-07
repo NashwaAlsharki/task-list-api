@@ -21,19 +21,23 @@ def validate_id(id):
 
 # take a task and return it as json
 def json_details(task):
-    return {"task": {
-                "id": task.task_id,
-                "title": task.title,
-                "description": task.description,
-                "is_complete": bool(task.completed_at)
-                }}
+    return {
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": bool(task.completed_at)
+            }
 
 # return all tasks as json
 @task_bp.route("", methods=["GET"])
 def get_tasks():
     tasks = Task.query.all()
     task_response = [json_details(task) for task in tasks]
-    return task_response, 200
+    
+    if not task_response:
+        return task_response, 200
+    
+    return jsonify(task_response), 200
     
 # return one task by id
 @task_bp.route("/<task_id>", methods=["GET"])
