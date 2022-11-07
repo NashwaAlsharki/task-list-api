@@ -85,7 +85,7 @@ def update_task(task_id):
     return json_details(task), 200
 
 # return a task complete or incomplete status
-@app.route("/<task_id>/<complete>", methods=["PATCH"])
+@task_bp.route("/<task_id>/<complete>", methods=["PATCH"])
 def task_complete_status(complete, task_id):
     task = validate_id(task_id)
 
