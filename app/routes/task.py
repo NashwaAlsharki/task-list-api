@@ -1,26 +1,17 @@
 from flask import Blueprint, jsonify, request
 from app.models.task_model import Task
 from datetime import datetime
-from .helper import get_by_id
+from .helper import get_by_id, json_details, get_all
 from app import db
 
 
 task_bp = Blueprint('task_bp', __name__, url_prefix='/tasks')
 
-# take a task and return it as a dictionary
-def json_details(task):
-    return {
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": bool(task.completed_at)
-            }
-
 # return all tasks as json
 @task_bp.route("", methods=["GET"])
 def get_tasks():
     tasks = Task.query.all()
-    response = [json_details(task) for task in tasks]
+    response = [json_details(Task, task) for task in tasks]
     
     return jsonify(response), 200
     
@@ -28,7 +19,7 @@ def get_tasks():
 @task_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = get_by_id(Task, task_id)
-    return json_details(task), 200
+    return json_details(Task, task), 200
 
 # return tasks by title
 @task_bp.route("?title=<title>", methods=["GET"])
@@ -45,7 +36,7 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
 
-    return json_details(new_task), 201
+    return json_details(Task, new_task), 201
 
 # delete a task by id
 @task_bp.route("/<task_id>", methods=["DELETE"])
@@ -68,7 +59,7 @@ def update_task(task_id):
 
     db.session.commit()
 
-    return json_details(task), 200
+    return json_details(Task, task), 200
 
 # return task complete/incomplete status
 @task_bp.route("/<task_id>/<complete>", methods=["PATCH"])
@@ -84,4 +75,4 @@ def task_complete_status(complete, task_id):
     
     db.session.commit()
 
-    return json_details(task), 200
+    return json_details(Task, task), 200

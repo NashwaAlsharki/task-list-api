@@ -12,3 +12,4 @@ def get_by_id(cls, id):
         return abort(make_response({"message": f"{id} not found"}, 404))
 
     return model
+

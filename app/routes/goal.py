@@ -30,7 +30,7 @@ def get_one_goal(goal_id):
 @goal_bp.route("", methods=["POST"])
 def create_goal():
     request_body = request.get_json()
-    if not request_body.get("title"):
+    if not request_body.get("title") is None:
         return abort(make_response({"details": "Invalid data"}, 400))
 
     new_goal = Goal(title = request_body["title"])
