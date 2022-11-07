@@ -15,7 +15,6 @@ def json_details(task):
             "is_complete": bool(task.completed_at)
             }
 
-
 # return all tasks as json
 @task_bp.route("", methods=["GET"])
 def get_tasks():
@@ -29,9 +28,6 @@ def get_tasks():
 def get_one_task(task_id):
     task = get_by_id(Task, task_id)
     return json_details(task), 200
-
-# return tasks by title
-@task_bp.route("?title=<title>", methods=["GET"])
 
 # create a new task
 @task_bp.route("", methods=["POST"])

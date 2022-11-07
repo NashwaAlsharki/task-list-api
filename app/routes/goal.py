@@ -13,7 +13,7 @@ def json_details(goal):
             }
 
 # return all goals as json
-@goal_bp.route("", methods=["GET"])
+@goal_bp.route("", methods["GET"])
 def get_goal():
     goals = Goal.query.all()
     response = [json_details(goal) for goal in goals]
@@ -29,12 +29,13 @@ def get_one_goal(goal_id):
 # create a new goal
 @goal_bp.route("", methods=["POST"])
 def create_goal():
-    request_body = request.get_json()
-    if not request_body.get("title") is None:
+    request_body = request.get_json()        
+    
+    try:
+        new_goal = Goal(title = request_body["title"])
+    except:
         return abort(make_response({"details": "Invalid data"}, 400))
 
-    new_goal = Goal(title = request_body["title"])
-    
     db.session.add(new_goal)
     db.session.commit()
 
