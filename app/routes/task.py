@@ -1,6 +1,7 @@
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, make_response, request
+from datetime import datetime
 
 task_bp = Blueprint('task_bp', __name__, url_prefix='/tasks')
 
@@ -8,9 +9,12 @@ def validate_id(id):
     try:
         int(id)
     except ValueError:
-        return make_response("", 404)
+        return make_response("", 400)
     
     task = Task.query.get(id)
+    if not task:
+        return make_response("", 404)
+
     return task
 
 @task_bp.route("", methods=["GET"])
@@ -24,8 +28,7 @@ def get_tasks():
             "id": task.task_id,
             "title": task.title,
             "description": task.description,
-            "is_complete": task.is_complete
-        })
+            "is_complete": bool(task.completed_at)})
     
     if not task_response:
         return task_response, 200
@@ -37,24 +40,24 @@ def get_one_task(task_id):
     
     task = validate_id(task_id)
     
-    return {
+    return {"task":{
             "id": task.task_id,
             "title": task.title,
             "description": task.description,
-            "is_complete": task.is_complete
-            }, 200
+            "is_complete": bool(task.completed_at)
+            }}, 200
 
 @task_bp.route("/<title>", methods=["GET"])
 def get_one_task_by_title(title):
         
         task = Task.query.filter_by(title=title).first()
         
-        return {
+        return {"task": {
                 "id": task.task_id,
                 "title": task.title,
                 "description": task.description,
-                "is_complete": task.is_complete
-                }, 200
+                "is_complete": bool(task.completed_at)
+                }}, 200
 
 @task_bp.route("", methods=["POST"])
 def create_task():
@@ -82,7 +85,6 @@ def delete_task(task_id):
 
     return {"message": f"Task {task.task_id} successfully deleted"}, 200
     
-
 @task_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
     
@@ -94,41 +96,30 @@ def update_task(task_id):
 
     db.session.commit()
 
-    return {
+    return {"task": {
             "id": task.task_id,
             "title": task.title,
             "description": task.description,
-            "is_complete": task.is_complete
-            }, 200
+            "is_complete": bool(task.completed_at)
+            }}, 200
 
-@app.route("/<task_id>/mark_complete", methods=["PATCH"])
-def mark_complete_task(client, task_id):
+@app.route("/<task_id>/<complete>", methods=["PATCH"])
+def change_complete_task(complete, task_id):
         
         task = validate_id(task_id)
 
-        if not task.completed_at:
-            task.completed_at = datetime.utcnow()
-            db.session.commit()
+        if complete == "mark_complete":
+            if not task.completed_at:
+                task.completed_at = datetime.now()
+
+        elif complete == "mark_incomplete":
+            task.completed_at = None
+        
+        db.session.commit()
     
-        return {
+        return {"task": {
                 "id": task.task_id,
                 "title": task.title,
                 "description": task.description,
-                "is_complete": True
-                }, 200
-
-@app.route("/<task_id>/mark_incomplete", methods=["PATCH"])
-def mark_incomplete_task(client, task_id):
-            
-            task = validate_id(task_id)
-    
-            if task.completed_at:
-                task.completed_at = None
-                db.session.commit()
-        
-            return {
-                    "id": task.task_id,
-                    "title": task.title,
-                    "description": task.description,
-                    "is_complete": False
-                    }, 200
+                "is_complete": bool(task.completed_at)
+                }}, 200
