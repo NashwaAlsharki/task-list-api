@@ -45,11 +45,8 @@ def get_one_task(task_id):
     task = validate_id(task_id)
     return json_details(task), 200
 
-# return one task by title
-@task_bp.route("/<title>", methods=["GET"])
-def get_one_task_by_title(title):
-    task = Task.query.filter_by(title=title).first()
-    return json_details(task), 200
+# return tasks by title
+@task_bp.route("?title=<title>", methods=["GET"])
 
 # create a new task
 @task_bp.route("", methods=["POST"])
@@ -88,7 +85,7 @@ def update_task(task_id):
 
     return json_details(task), 200
 
-# return a task complete or incomplete status
+# return task complete/incomplete status
 @task_bp.route("/<task_id>/<complete>", methods=["PATCH"])
 def task_complete_status(complete, task_id):
     task = validate_id(task_id)
