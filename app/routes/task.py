@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, make_response, request
+from flask import Blueprint, abort, jsonify, make_response, request
 from app.models.task_model import Task
 from datetime import datetime
 from app import db
@@ -11,11 +11,11 @@ def validate_id(id):
     try:
         int(id)
     except ValueError:
-        return make_response("", 400)
+        return abort(make_response({"message": f"{id} is not a valid id"}, 400))
     
     task = Task.query.get(id)
     if not task:
-        return make_response("", 404)
+        return abort(make_response({"message": f"Task {id} not found"}, 404))
 
     return task
 
@@ -63,7 +63,7 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
 
-    return {f"Task {new_task.title} has been successfully created!"}, 201
+    return {"message": f"Task {new_task.title} has been successfully created!"}, 201
 
 # delete a task by id
 @task_bp.route("/<task_id>", methods=["DELETE"])
