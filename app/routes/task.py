@@ -1,59 +1,92 @@
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, make_response, request
+import requests
 
-task_bp = Blueprint('task_bp', __name__, url_prefix='/tasks')
+task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
+
+@task_bp.route("", methods=["POST"])
+def create_task():
+    try:
+        request_body = request.get_json()
+        
+        new_task = Task(
+            title = request_body["title"],
+            description = request_body["description"]
+        )
+        
+        db.session.add(new_task)
+        db.session.commit()
+        
+        return {
+            "task": {
+                "id": new_task.task_id,
+                "title": new_task.title,
+                "description": new_task.description,
+                "is_complete": bool(new_task.completed_at)
+            }
+        }, 201
+    except Exception:
+        return {
+            "details": "Invalid data"
+        }, 400
 
 @task_bp.route("", methods=["GET"])
 def get_tasks():
-
-    tasks = Task.query.all()
-
-    task_response = []
-    for task in tasks:
-        task_response.append({
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": task.is_complete
-        })
     
-    if not task_response:
-        return task_response, 200
+    sort_query = request.args.get("sort")
+    
+    if sort_query:
+        tasks_asc = Task.query.order_by(Task.title.asc())
+        tasks_desc = Task.query.order_by(Task.title.desc())
+        
+        if tasks_asc:
+            task_response = [{"id": task.task_id, "title": task.title, "description": task.description, "is_complete": bool(task.completed_at)} for task in tasks_asc]
+
+        elif tasks_desc:
+            tasks = tasks_desc
+            task_response = [{"id": task.task_id, "title": task.title, "description": task.description, "is_complete": bool(task.completed_at)} for task in tasks_desc]
+        
+    else:
+        tasks = Task.query.all()
+
+        task_response = [{"id": task.task_id, "title": task.title, "description": task.description, "is_complete": bool(task.completed_at)} for task in tasks]
+            
     return jsonify(task_response), 200
+    
 
 @task_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = Task.query.get(task_id)
 
-    if task is None:
-        return make_response("", 404)
+    if not task:
+        return {
+            "message":"Task not found"
+        }, 404
     
     return {
         "task": {
             "id": task.task_id,
             "title": task.title,
             "description": task.description,
-            "is_complete": task.is_complete
+            "is_complete": bool(task.completed_at)
         }
     }, 200
-
-@task_bp.route("/<title>", methods=["GET"])
-
-@task_bp.route("/<completed_at>", methods=["GET"])
 
 @task_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
     task = Task.query.get(task_id)
 
     if task is None:
-        return make_response("", 404)
+        return {
+            "message":"Task not found"
+        }, 404
     
     db.session.delete(task)
     db.session.commit()
 
     return {
-        "message": f"Task {task.task_id} successfully deleted"
+        "details": f'Task {task.task_id} "{task.title}" successfully deleted'
     }, 200
     
 
@@ -62,36 +95,34 @@ def update_task(task_id):
     task = Task.query.get(task_id)
 
     if task is None:
-        return make_response("", 404)
+        return {
+            "message":"Task not found"
+        }, 404
         
     request_body = request.get_json()
     task.title = request_body["title"]
     task.description = request_body["description"]
 
     db.session.commit()
-
     return {
         "task": {
             "id": task.task_id,
             "title": task.title,
             "description": task.description,
-            "is_complete": task.is_complete
+            "is_complete": bool(task.completed_at)
         }
     }, 200
-
-
-@task_bp.route("", methods=["POST"])
-def create_task():
-    request_body = request.get_json()
     
-    new_task = Task(
-        title = request_body["title"],
-        description = request_body["description"],
-        completed_at = request_body["completed_at"]
-    )
+@task_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def send_slack_message(task_id):
+    url = "https://slack.com/api/chat.postMessage?channel=slack-bot-test-channel&text=postman&pretty=1"
+
+    payload = "{\n        \"title\": \"O\",\n        \"description\": \"Test Description\"\n    }\n"
+    headers = {
+    'Authorization': 'Bearer xoxb-3833211039014-4320338810407-hhRNwTYwkcmrntPLAbWpKBJD',
+    'Content-Type': 'text/plain'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
     
-    db.session.add(new_task)
-    db.session.commit()
-
-    return make_response(f"Task {new_task.title} has been successfully created!", 201)
-
+    return response
