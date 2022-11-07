@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 from datetime import datetime
-from app.models.task import Task
+from app.models.task_model import Task
 import pytest
 
 

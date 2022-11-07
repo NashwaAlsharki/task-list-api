@@ -1,5 +1,5 @@
 from app.routes.task import task_bp
-from app.models.task import Task
+from app.models.task_model import Task
 import pytest
 
 @pytest.mark.skip(reason="No way to test this feature yet")

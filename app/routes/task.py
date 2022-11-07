@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, make_response, request
-from app.models.task import Task
+from app.models.task_model import Task
 from datetime import datetime
 from app import db
+
 
 task_bp = Blueprint('task_bp', __name__, url_prefix='/tasks')
 
@@ -25,30 +26,26 @@ def json_details(task):
                 "title": task.title,
                 "description": task.description,
                 "is_complete": bool(task.completed_at)
-                }}, 200
+                }}
 
 # return all tasks as json
 @task_bp.route("", methods=["GET"])
 def get_tasks():
     tasks = Task.query.all()
     task_response = [json_details(task) for task in tasks]
+    return task_response, 200
     
-    if not task_response:
-        return task_response, 200
-    
-    return jsonify(task_response), 200
-
 # return one task by id
 @task_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = validate_id(task_id)
-    return json_details(task)
+    return json_details(task), 200
 
 # return one task by title
 @task_bp.route("/<title>", methods=["GET"])
 def get_one_task_by_title(title):
     task = Task.query.filter_by(title=title).first()
-    return json_details(task)
+    return json_details(task), 200
 
 # create a new task
 @task_bp.route("", methods=["POST"])
@@ -85,20 +82,20 @@ def update_task(task_id):
 
     db.session.commit()
 
-    return json_details(task)
+    return json_details(task), 200
 
 # return a task complete or incomplete status
 @app.route("/<task_id>/<complete>", methods=["PATCH"])
 def task_complete_status(complete, task_id):
-        task = validate_id(task_id)
+    task = validate_id(task_id)
 
-        if complete == "mark_complete":
-            if not task.completed_at:
-                task.completed_at = datetime.now()
+    if complete == "mark_complete":
+        if not task.completed_at:
+            task.completed_at = datetime.now()
 
-        elif complete == "mark_incomplete":
-            task.completed_at = None
-        
-        db.session.commit()
+    elif complete == "mark_incomplete":
+        task.completed_at = None
     
-        return json_details(task)
+    db.session.commit()
+
+    return json_details(task), 200
