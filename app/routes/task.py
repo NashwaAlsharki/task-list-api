@@ -1,25 +1,13 @@
-from flask import Blueprint, abort, jsonify, make_response, request
+from flask import Blueprint, jsonify, request
 from app.models.task_model import Task
 from datetime import datetime
+from .helper import get_by_id
 from app import db
 
 
 task_bp = Blueprint('task_bp', __name__, url_prefix='/tasks')
 
-# check that task id is an integer and that it exists
-def validate_id(id):
-    try:
-        int(id)
-    except ValueError:
-        return abort(make_response({"message": f"{id} is not a valid id"}, 400))
-    
-    task = Task.query.get(id)
-    if not task:
-        return abort(make_response({"message": f"Task {id} not found"}, 404))
-
-    return task
-
-# take a task and return it as json
+# take a task and return it as a dictionary
 def json_details(task):
     return {
             "id": task.task_id,
@@ -32,17 +20,14 @@ def json_details(task):
 @task_bp.route("", methods=["GET"])
 def get_tasks():
     tasks = Task.query.all()
-    task_response = [json_details(task) for task in tasks]
+    response = [json_details(task) for task in tasks]
     
-    if not task_response:
-        return task_response, 200
-    
-    return jsonify(task_response), 200
+    return jsonify(response), 200
     
 # return one task by id
 @task_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
-    task = validate_id(task_id)
+    task = get_by_id(Task, task_id)
     return json_details(task), 200
 
 # return tasks by title
@@ -60,12 +45,12 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
 
-    return {"message": f"Task {new_task.title} has been successfully created!"}, 201
+    return json_details(new_task), 201
 
 # delete a task by id
 @task_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
-    task = validate_id(task_id)
+    task = get_by_id(Task, task_id)
 
     db.session.delete(task)
     db.session.commit()
@@ -75,7 +60,7 @@ def delete_task(task_id):
 # update a task by id
 @task_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
-    task = validate_id(task_id)
+    task = get_by_id(Task, task_id)
     request_body = request.get_json()
 
     task.title = request_body["title"]
@@ -88,7 +73,7 @@ def update_task(task_id):
 # return task complete/incomplete status
 @task_bp.route("/<task_id>/<complete>", methods=["PATCH"])
 def task_complete_status(complete, task_id):
-    task = validate_id(task_id)
+    task = get_by_id(Task, task_id)
 
     if complete == "mark_complete":
         if not task.completed_at:
