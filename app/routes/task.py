@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from app.models.task_model import Task
 from datetime import datetime
-from .helper import get_by_id
+from .helper import get_task_by_id
 from app import db
 
 task_bp = Blueprint('task_bp', __name__, url_prefix='/tasks')
@@ -21,28 +21,21 @@ def json_details(task):
 def get_tasks():
     sort_query = request.args.get("sort")
     
-    if sort_query:
-        tasks_asc = Task.query.order_by(Task.title.asc())
-        tasks_desc = Task.query.order_by(Task.title.desc())
-        
-        if tasks_asc:
-            tasks = tasks_asc
-            response = [{"id": task.task_id, "title": task.title, "description": task.description, "is_complete": bool(task.completed_at)} for task in tasks_asc]
-
-        elif tasks_desc:
-            tasks = tasks_desc
-            response = [{"id": task.task_id, "title": task.title, "description": task.description, "is_complete": bool(task.completed_at)} for task in tasks_desc]
+    if sort_query == "asc":
+        tasks = Task.query.order_by(Task.title.asc())
+    elif sort_query == "desc":
+        tasks = Task.query.order_by(Task.title.desc())
         
     else:
         tasks = Task.query.all()
-        response = [{"id": task.task_id, "title": task.title, "description": task.description, "is_complete": bool(task.completed_at)} for task in tasks]
-    
+        
+    response = [{"id": task.task_id, "title": task.title, "description": task.description, "is_complete": bool(task.completed_at)} for task in tasks]
     return jsonify(response), 200
     
 # return one task by id
 @task_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
-    task = get_by_id(Task, task_id)
+    task = get_task_by_id(Task, task_id)
         
     return json_details(task), 200
 
@@ -67,7 +60,7 @@ def create_task():
 # delete a task by id
 @task_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
-    task = get_by_id(Task, task_id)
+    task = get_task_by_id(Task, task_id)
 
     db.session.delete(task)
     db.session.commit()
@@ -77,7 +70,7 @@ def delete_task(task_id):
 # update a task by id
 @task_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
-    task = get_by_id(Task, task_id)
+    task = get_task_by_id(Task, task_id)
     request_body = request.get_json()
 
     task.title = request_body["title"]
@@ -90,7 +83,7 @@ def update_task(task_id):
 # return task complete/incomplete status
 @task_bp.route("/<task_id>/<complete>", methods=["PATCH"])
 def task_complete_status(complete, task_id):
-    task = get_by_id(Task, task_id)
+    task = get_task_by_id(Task, task_id)
 
     if complete == "mark_complete":
         if not task.completed_at:
