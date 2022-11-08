@@ -9,7 +9,7 @@ def get_by_id(cls, id):
     
     model = cls.query.get(id)
     if not model:
-        return abort(make_response({"message": f"{id} not found"}, 404))
+        return abort(make_response({"message": f"Task not found"}, 404))
 
     return model
 
