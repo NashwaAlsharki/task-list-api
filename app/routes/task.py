@@ -23,21 +23,19 @@ def get_tasks():
     sort_query = request.args.get("sort")
     
     if sort_query:
-        tasks_asc = Task.query.order_by(Task.title.asc())
-        tasks_desc = Task.query.order_by(Task.title.desc())
+        tasks = Task.query.order_by(Task.title.asc(), Task.title.desc())
+        # tasks_asc = Task.query.order_by(Task.title.asc())
+        # tasks_desc = Task.query.order_by(Task.title.desc())
         
-        if tasks_asc:
-            tasks = tasks_asc
-            response = [{"id": task.task_id, "title": task.title, "description": task.description, "is_complete": bool(task.completed_at)} for task in tasks_asc]
-
-        elif tasks_desc:
-            tasks = tasks_desc
-            response = [{"id": task.task_id, "title": task.title, "description": task.description, "is_complete": bool(task.completed_at)} for task in tasks_desc]
+        # if tasks_asc:
+        #     tasks = tasks_asc
+        # elif tasks_desc:
+        #     tasks = tasks_desc
         
     else:
         tasks = Task.query.all()
-        response = [{"id": task.task_id, "title": task.title, "description": task.description, "is_complete": bool(task.completed_at)} for task in tasks]
-    
+        
+    response = [{"id": task.task_id, "title": task.title, "description": task.description, "is_complete": bool(task.completed_at)} for task in tasks]
     return jsonify(response), 200
     
 # return one task by id
