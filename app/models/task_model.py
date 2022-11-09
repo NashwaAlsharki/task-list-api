@@ -5,3 +5,4 @@ class Task(db.Model):
     title = db.Column(db.String)
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime, default=None)
+    goal = db.relationship("Goal", back_populates="tasks")

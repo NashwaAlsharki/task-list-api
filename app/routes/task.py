@@ -84,8 +84,7 @@ def update_task(task_id):
 # return task complete/incomplete status
 @task_bp.route("/<task_id>/<complete>", methods=["PATCH"])
 def task_complete_status(complete, task_id):
-    # task = get_task_by_id(Task, task_id)
-    # SLACK_KEY = os.environ.get("SLACK_KEY")
+    task = get_task_by_id(Task, task_id)
 
     if complete == "mark_complete":
         if not task.completed_at:
