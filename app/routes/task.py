@@ -112,17 +112,3 @@ def update_task(task_id):
             "is_complete": bool(task.completed_at)
         }
     }, 200
-    
-@task_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
-def send_slack_message(task_id):
-    url = "https://slack.com/api/chat.postMessage?channel=slack-bot-test-channel&text=postman&pretty=1"
-
-    payload = "{\n        \"title\": \"O\",\n        \"description\": \"Test Description\"\n    }\n"
-    headers = {
-    'Authorization': 'Bearer xoxb-3833211039014-4320338810407-hhRNwTYwkcmrntPLAbWpKBJD',
-    'Content-Type': 'text/plain'
-    }
-
-    response = requests.request("POST", url, headers=headers, data=payload)
-    
-    return response
