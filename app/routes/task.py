@@ -4,6 +4,7 @@ from datetime import datetime
 from .helper import get_task_by_id
 from app import db
 import os
+import requests
 
 task_bp = Blueprint('task_bp', __name__, url_prefix='/tasks')
 
@@ -96,3 +97,24 @@ def task_complete_status(complete, task_id):
     db.session.commit()
 
     return json_details(task), 200
+
+@task_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def slack_bot(task_id):
+    task = get_task_by_id(Task, task_id)
+    
+    PATH = "https://slack.com/api/chat.postMessage?"
+    TOKEN = os.environ.get("SLACK_KEY")
+    CHANNEL = "slack-bot-test-channel"
+    TEXT = f"Someone just completed the task {task.title}"
+    
+    payload = {
+        "channel": CHANNEL,
+        "text": TEXT
+    }
+    
+    headers = {
+        "Authorization": TOKEN
+    }
+    
+    response = requests.post(PATH, headers=headers, data=payload)
+    return response.text
