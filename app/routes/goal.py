@@ -7,16 +7,17 @@ goal_bp = Blueprint('goal_bp', __name__, url_prefix='/goals')
 
 # take a goal and return it as a dictionary
 def json_details(goal):
-    return {
-            "id": goal.goal_id,
-            "title": goal.title,
+    return {"goal": {
+                "id": goal.goal_id,
+                "title": goal.title,
             }
+        }
 
 # return all goals as json
 @goal_bp.route("", methods=["GET"])
 def get_goal():
     goals = Goal.query.all()
-    response = [json_details(goal) for goal in goals]
+    response = [{"id": goal.goal_id, "title": goal.title} for goal in goals]
     
     return jsonify(response), 200
     
@@ -44,17 +45,17 @@ def create_goal():
 # delete a goal by id
 @goal_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_goal(goal_id):
-    goal = get_by_id(Goal, goal_id)
+    goal = get_goal_by_id(Goal, goal_id)
 
     db.session.delete(goal)
     db.session.commit()
 
-    return {"message": f"goal {goal.goal_id} successfully deleted"}, 200
+    return {"details": f'Goal {goal.goal_id} "{goal.title}" successfully deleted'}, 200
 
 # update a goal by id
 @goal_bp.route("/<goal_id>", methods=["PUT"])
 def update_task(goal_id):
-    goal = get_by_id(Goal, goal_id)
+    goal = get_goal_by_id(Goal, goal_id)
     request_body = request.get_json()
 
     goal.title = request_body["title"]
