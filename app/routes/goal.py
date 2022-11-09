@@ -1,7 +1,7 @@
 from flask import Blueprint, abort, jsonify, make_response, request
 from app.models.goal_model import Goal
 from app.models.task_model import Task
-from .helper import get_goal_by_id
+from .helper import get_goal_by_id, get_task_by_id
 from app import db
 
 goal_bp = Blueprint('goal_bp', __name__, url_prefix='/goals')
@@ -65,8 +65,20 @@ def update_task(goal_id):
 
     return json_details(goal), 200
 
-# @goal_bp.route("/<goal_id>/tasks", methods=["POST"])
-# def post_task_ids_to_goal(goal_id):
+# add a list of tasks to a goal
+@goal_bp.route("/<goal_id>/tasks", methods=["POST"])
+def post_task_ids_to_goal(goal_id):
+    goal = get_goal_by_id(Goal, goal_id)
+    request_body = request.get_json()
+
+    for task_id in request_body["task_ids"]:
+        task = get_task_by_id(Task, task_id)
+        task.goal_id = goal.goal_id
+
+    db.session.commit()
+
+    return {"id": goal.goal_id, "task_ids": request_body["task_ids"]}, 200
+
 #     goal = get_goal_by_id(Goal, goal_id)
 #     request_body = request.get_json()
     
