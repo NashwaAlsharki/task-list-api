@@ -65,16 +65,16 @@ def update_task(goal_id):
 
     return json_details(goal), 200
 
-@goal_bp.route("/<goal_id>/tasks", methods=["POST"])
-def post_task_ids_to_goal(goal_id):
-    goal = get_goal_by_id(Goal, goal_id)
-    request_body = request.get_json()
+# @goal_bp.route("/<goal_id>/tasks", methods=["POST"])
+# def post_task_ids_to_goal(goal_id):
+#     goal = get_goal_by_id(Goal, goal_id)
+#     request_body = request.get_json()
     
-    new_tasks = Task(task_id=request_body["task_ids"])
+#     new_tasks = Goal(task_id=request_body["task_ids"])
  
-    db.session.add(new_tasks)
-    db.session.commit()
-    return {
-        "id": goal.goal_id,
-        "task_ids": new_tasks.task_id
-    }, 200
+#     db.session.add(new_tasks)
+#     db.session.commit()
+#     return {
+#         "id": goal.goal_id,
+#         "task_ids": new_tasks.task_id
+#     }, 200
