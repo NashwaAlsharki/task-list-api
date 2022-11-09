@@ -1,6 +1,6 @@
 from flask import Blueprint, abort, jsonify, make_response, request
 from app.models.goal_model import Goal
-from .helper import get_by_id
+from .helper import get_goal_by_id
 from app import db
 
 goal_bp = Blueprint('goal_bp', __name__, url_prefix='/goals')
@@ -13,7 +13,7 @@ def json_details(goal):
             }
 
 # return all goals as json
-@goal_bp.route("", methods["GET"])
+@goal_bp.route("", methods=["GET"])
 def get_goal():
     goals = Goal.query.all()
     response = [json_details(goal) for goal in goals]
@@ -23,7 +23,7 @@ def get_goal():
 # return one goal by id
 @goal_bp.route("/<goal_id>", methods=["GET"])
 def get_one_goal(goal_id):
-    goal = get_by_id(Goal, goal_id)
+    goal = get_goal_by_id(Goal, goal_id)
     return json_details(goal), 200
 
 # create a new goal
