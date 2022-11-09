@@ -3,6 +3,8 @@ from app.models.task_model import Task
 from datetime import datetime
 from .helper import get_task_by_id
 from app import db
+from dotenv import SLACK_KEY
+import os
 
 
 task_bp = Blueprint('task_bp', __name__, url_prefix='/tasks')
@@ -88,6 +90,7 @@ def update_task(task_id):
 @task_bp.route("/<task_id>/<complete>", methods=["PATCH"])
 def task_complete_status(complete, task_id):
     task = get_task_by_id(Task, task_id)
+    SLACK_KEY = os.environ.get("SLACK_KEY")
 
     if complete == "mark_complete":
         if not task.completed_at:
