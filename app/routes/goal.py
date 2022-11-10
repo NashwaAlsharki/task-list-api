@@ -71,40 +71,47 @@ def post_task_ids_to_goal(goal_id):
     goal = get_goal_by_id(Goal, goal_id)
     request_body = request.get_json()
 
-    for task_id in request_body["task_ids"]:
+    task_goal_id_list = []
+    task_to_connect = request_body["task_ids"]
+    for task_id in task_to_connect:
         task = get_task_by_id(Task, task_id)
-        task.goal = goal.goal_id
-    
-    goal.tasks = request_body["task_ids"]
- 
-    db.session.commit()
+        task.goal_id = goal.goal_id
+        task_goal_id_list.append(task_id)
+        db.session.commit()
     
     return {
         "id": goal.goal_id,
-        "task_ids": goal.tasks
+        "task_ids": task_goal_id_list
     }, 200
-    
-    # task_list = []
-    # for id in request_body["task_ids"]:
-    #     task = get_task_by_id(Task, id)
-    #     task_list.append(task.task_id)
-        
-    # db.session.commit()
-    
-    # return {
-    #     "id": goal.goal_id,
-    #     "task_ids": task_list
-    # }, 200
 
 # get tasks for one goal
 @goal_bp.route("/<goal_id>/tasks", methods=["GET"])
+# def get_goal_and_tasks(goal_id):
+#     goal = get_goal_by_id(Goal, goal_id)
+
+#     if goal.tasks:
+#         for task_id in goal.tasks:
+#             tasks = get_task_by_id(Task, task_id)
+#             response = {
+#                 "id": goal.goal_id,
+#                 "title": goal.title,
+#                 "tasks": [task.to_dict() for task in tasks]}
+#     else:
+#         response = {"id": goal.goal_id,
+#                     "title": goal.title,
+#                     "tasks": []}
+
+#     return response, 200
 def get_goal_and_tasks(goal_id):
     goal = get_goal_by_id(Goal, goal_id)
+    
+    goals_list = []
 
-    if goal.tasks:
-        tasks = [get_task_by_id(Task, task_id) for task_id in goal.tasks]
-        response = {"id": goal.goal_id, "title": goal.title, "tasks": [task.to_dict() for task in tasks]}
-    else:
-        response = {"id": goal.goal_id, "title": goal.title, "tasks": []}
+    for task in goal.tasks:
+        # task = get_task_by_id(Task, task)
+        goals_list.append(Task.to_dict(task))
 
-    return response, 200
+    return jsonify(
+        { "id": goal.goal_id,
+         "title": goal.title,
+         "tasks": goals_list}), 200
