@@ -21,7 +21,7 @@ def get_goal():
     response = [{"id": goal.goal_id, "title": goal.title} for goal in goals]
     
     return jsonify(response), 200
-    
+
 # return one goal by id
 @goal_bp.route("/<goal_id>", methods=["GET"])
 def get_one_goal(goal_id):
@@ -73,21 +73,26 @@ def post_task_ids_to_goal(goal_id):
 
     for task_id in request_body["task_ids"]:
         task = get_task_by_id(Task, task_id)
-        task.goal_id = goal.goal_id
-
+        task.goal = goal.goal_id
+    
+    goal.tasks = request_body["task_ids"]
+ 
     db.session.commit()
-
-    return {"id": goal.goal_id, "task_ids": request_body["task_ids"]}, 200
-
-#     goal = get_goal_by_id(Goal, goal_id)
-#     request_body = request.get_json()
     
-#     new_tasks = Task(task_id=request_body["task_ids"])
-#     print(new_tasks)
-    
-#     db.session.add(new_tasks)
-#     db.session.commit()
-#     return {
-#         "id": goal.goal_id,
-#         "task_ids": new_tasks.task_id
-#     }, 200
+    return {
+        "id": goal.goal_id,
+        "task_ids": goal.tasks
+    }, 200
+
+# get tasks for one goal
+@goal_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_goal_and_tasks(goal_id):
+    goal = get_goal_by_id(Goal, goal_id)
+
+    if goal.tasks:
+        tasks = [get_task_by_id(Task, task_id) for task_id in goal.tasks]
+        response = {"id": goal.goal_id, "title": goal.title, "tasks": [task.to_dict() for task in tasks]}
+    else:
+        response = {"id": goal.goal_id, "title": goal.title, "tasks": []}
+
+    return response, 200
