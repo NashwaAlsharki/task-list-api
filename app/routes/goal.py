@@ -109,7 +109,14 @@ def get_goal_and_tasks(goal_id):
 
     for task in goal.tasks:
         # task = get_task_by_id(Task, task)
-        goals_list.append(Task.to_dict(task))
+        response = {
+                "id": task.task_id,
+                "title": task.title,
+                "description": task.description,
+                "is_complete": bool(task.completed_at),
+                "goal_id": goal.goal_id
+            }
+        goals_list.append(response)
 
     return jsonify(
         { "id": goal.goal_id,

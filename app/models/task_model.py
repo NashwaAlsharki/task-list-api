@@ -12,8 +12,11 @@ class Task(db.Model):
         task_dict = {
             "id": self.task_id,
             "title": self.title,
-            "description": self.description
+            "description": self.description,
+            "is_complete": self.completed_at
         }
     
-    if self.goal:
-        task_dict["goal"] = self.goal.title
+        if self.goal:
+            task_dict["goal_id"] = self.goal.goal_id
+            
+        return task_dict
