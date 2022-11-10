@@ -1,8 +1,8 @@
-"""updating databases
+"""trying to migrate new databases
 
-Revision ID: c7b383ddfd48
+Revision ID: 2128572fbe74
 Revises: 
-Create Date: 2022-11-09 11:07:42.640857
+Create Date: 2022-11-10 05:26:47.833564
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'c7b383ddfd48'
+revision = '2128572fbe74'
 down_revision = None
 branch_labels = None
 depends_on = None

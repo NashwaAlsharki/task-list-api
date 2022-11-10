@@ -71,30 +71,30 @@ def post_task_ids_to_goal(goal_id):
     goal = get_goal_by_id(Goal, goal_id)
     request_body = request.get_json()
 
-    # for task_id in request_body["task_ids"]:
-    #     task = get_task_by_id(Task, task_id)
-    #     task.goal = goal.goal_id
+    for task_id in request_body["task_ids"]:
+        task = get_task_by_id(Task, task_id)
+        task.goal = goal.goal_id
     
-    # goal.tasks = request_body["task_ids"]
+    goal.tasks = request_body["task_ids"]
  
-    # db.session.commit()
-    
-    # return {
-    #     "id": goal.goal_id,
-    #     "task_ids": goal.tasks
-    # }, 200
-    
-    task_list = []
-    for id in request_body["task_ids"]:
-        task = get_task_by_id(Task, id)
-        task_list.append(task.task_id)
-        
     db.session.commit()
     
     return {
         "id": goal.goal_id,
-        "task_ids": task_list
+        "task_ids": goal.tasks
     }, 200
+    
+    # task_list = []
+    # for id in request_body["task_ids"]:
+    #     task = get_task_by_id(Task, id)
+    #     task_list.append(task.task_id)
+        
+    # db.session.commit()
+    
+    # return {
+    #     "id": goal.goal_id,
+    #     "task_ids": task_list
+    # }, 200
 
 # get tasks for one goal
 @goal_bp.route("/<goal_id>/tasks", methods=["GET"])
