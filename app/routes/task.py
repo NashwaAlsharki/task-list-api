@@ -90,22 +90,22 @@ def task_complete_status(complete, task_id):
     if complete == "mark_complete":
         if not task.completed_at:
             task.completed_at = datetime.now()
-        PATH = "https://slack.com/api/chat.postMessage?"
-        TOKEN = os.environ.get("SLACK_KEY")
-        CHANNEL = "slack-bot-test-channel"
-        TEXT = f"Someone just completed the task {task.title}"
-        
-        payload = {
-            "channel": CHANNEL,
-            "text": TEXT
-        }
-        
-        headers = {
-            "Authorization": TOKEN
-        }
-        
-        response = requests.post(PATH, headers=headers, data=payload)
-        print(response.text)
+            PATH = "https://slack.com/api/chat.postMessage?"
+            TOKEN = os.environ.get("SLACK_KEY")
+            CHANNEL = "slack-bot-test-channel"
+            TEXT = f"Someone just completed the task {task.title}"
+            
+            payload = {
+                "channel": CHANNEL,
+                "text": TEXT
+            }
+            
+            headers = {
+                "Authorization": TOKEN
+            }
+            
+            response = requests.post(PATH, headers=headers, data=payload)
+            print(response.text)
 
     elif complete == "mark_incomplete":
         task.completed_at = None
