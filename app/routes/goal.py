@@ -86,39 +86,9 @@ def post_task_ids_to_goal(goal_id):
 
 # get tasks for one goal
 @goal_bp.route("/<goal_id>/tasks", methods=["GET"])
-# def get_goal_and_tasks(goal_id):
-#     goal = get_goal_by_id(Goal, goal_id)
-
-#     if goal.tasks:
-#         for task_id in goal.tasks:
-#             tasks = get_task_by_id(Task, task_id)
-#             response = {
-#                 "id": goal.goal_id,
-#                 "title": goal.title,
-#                 "tasks": [task.to_dict() for task in tasks]}
-#     else:
-#         response = {"id": goal.goal_id,
-#                     "title": goal.title,
-#                     "tasks": []}
-
-#     return response, 200
 def get_goal_and_tasks(goal_id):
     goal = get_goal_by_id(Goal, goal_id)
     
-    goals_list = []
-
-    for task in goal.tasks:
-        # task = get_task_by_id(Task, task)
-        response = {
-                "id": task.task_id,
-                "title": task.title,
-                "description": task.description,
-                "is_complete": bool(task.completed_at),
-                "goal_id": goal.goal_id
-            }
-        goals_list.append(response)
-
-    return jsonify(
-        { "id": goal.goal_id,
-         "title": goal.title,
-         "tasks": goals_list}), 200
+    goal_dict = goal.to_dict()
+    goal_dict["tasks"] = [task.to_dict() for task in goal.tasks]
+    return goal_dict, 200

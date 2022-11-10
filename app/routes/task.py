@@ -38,8 +38,9 @@ def get_tasks():
 @task_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = get_task_by_id(Task, task_id)
-        
-    return json_details(task), 200
+    
+    task_dict = task.to_dict()
+    return {"task": task_dict}, 200
 
 # create a new task
 @task_bp.route("", methods=["POST"])
